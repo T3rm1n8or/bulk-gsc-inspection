@@ -1,75 +1,84 @@
-# BULK GOOGLE SEARCH CONSOLE URL INSPECTION TOOL
+# URL Inspection Tool Documentation
 
-A simple client-side tool that lets you inspect bulk URLs in Google Search Console. API key required.
+## Overview
 
-Follow these steps to use the URL Inspection Tool:
+The URL Inspection Tool is a web-based application that allows users to inspect multiple URLs using the Google Search Console API. It provides information about the indexing status, coverage, and other important metrics for each URL.
 
-- Enter your Google Cloud API Key. You can obtain this from the Google Cloud Console.
-- Enter the site URL you want to inspect. This should match a property you have verified in Google Search Console.
-- Paste the URLs you want to inspect, one per line, in the text area.
-- Click the "Inspect URLs" button to start the inspection process.
-- Once the inspection is complete, you can view the results on the page or export them as a CSV file.
+## Features
 
-**Note:** Keep your API key confidential. Do not share this page with your API key filled in.
+- Inspect multiple URLs at once
+- Display inspection results in a table format
+- Export results to CSV
+- OAuth 2.0 authentication with Google
 
-# Google Cloud Console Setup for URL Inspection Tool
+## Setup Instructions
 
-## 1. Create a Google Cloud Project
+### 1. Google Cloud Console Setup
 
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Click on the project drop-down and select "New Project".
-3. Enter a project name and click "Create".
-4. Wait for the project to be created and select it as your current project.
+- Go to the Google Cloud Console.
+- Create a new project or select an existing one.
+- Enable the Search Console API for your project:
+  - Go to "APIs & Services" > "Library"
+  - Search for "Search Console API"
+  - Click on it and press "Enable"
+- Set up OAuth 2.0 credentials:
+  - Go to "APIs & Services" > "Credentials"
+  - Click "Create Credentials" > "OAuth client ID"
+  - Choose "Web application" as the application type
+  - Set the authorized JavaScript origins to your domain (e.g., https://yourdomain.com)
+  - Set the authorized redirect URIs to your tool's URL (e.g., https://yourdomain.com/url-inspection-tool/)
+  - Note down the Client ID
+- Create an API Key:
+  - In the Credentials page, click "Create Credentials" > "API Key"
+  - Note down the API Key
 
-## 2. Enable the Search Console API
+### 2. Google Search Console Setup
 
-1. In the left sidebar, navigate to "APIs & Services" > "Library".
-2. Search for "Search Console API".
-3. Click on the "Search Console API" result.
-4. Click "Enable" to activate the API for your project.
+- Ensure you have a Google Search Console account with verified properties.
+- The Google account you use for authentication should have access to the properties you want to inspect.
 
-## 3. Create OAuth 2.0 Credentials
+### 3. Tool Setup
 
-1. In the left sidebar, navigate to "APIs & Services" > "Credentials".
-2. Click "Create Credentials" and select "OAuth client ID".
-3. If prompted, configure the OAuth consent screen:
-   - Choose "External" as the user type.
-   - Fill in the required fields (App name, User support email, Developer contact information).
-   - Add "/auth/webmasters.readonly" to the "Scopes for Google APIs" section.
-   - Save and continue.
-4. Back in the "Create OAuth client ID" screen:
-   - Choose "Web application" as the application type.
-   - Give your OAuth 2.0 client a name.
-   - Under "Authorized JavaScript origins", add the URL where your tool will be hosted (e.g., `https://yourdomain.com`).
-   - Click "Create".
-5. You'll see a modal with your client ID and client secret. Copy the client ID for later use.
+- Clone the repository or download the source code.
+- Replace `YOUR_CLIENT_ID_HERE` and `YOUR_API_KEY_HERE` in `script.js` with your actual Client ID and API Key.
+- Upload the files to your web server.
 
-## 4. Create API Key
+## Usage Instructions
 
-1. Still in the "Credentials" page, click "Create Credentials" again and select "API key".
-2. Copy the generated API key for later use.
-3. Click "Edit API key" to restrict it:
-   - Under "API restrictions", choose "Restrict key".
-   - Select "Search Console API" from the dropdown.
-   - Click "Save".
+1. Open the URL Inspection Tool in your web browser.
+2. Enter your Google Cloud Client ID and API Key in the respective input fields.
+3. Click the "Initialize" button to set up the API client.
+4. Click the "Authorize" button to sign in with your Google account.
+5. Enter the site URL you want to inspect. This should match a property you have verified in Google Search Console.
+6. Paste the URLs you want to inspect, one per line, in the text area.
+7. Click the "Inspect URLs" button to start the inspection process.
+8. Once the inspection is complete, you can view the results on the page or export them as a CSV file.
 
-## 5. Configure Your Tool
+## API Reference
 
-1. Open your URL Inspection Tool in a text editor.
-2. Locate the fields for entering the Client ID and API Key.
-3. When using the tool, paste your Client ID and API Key into these fields.
+The tool uses the following Google Search Console API endpoint:
 
-## 6. Important Notes
+- `urlInspection.index.inspect`: Inspects a URL and returns information about indexing status and any issues.
 
-- Keep your Client ID and API Key confidential. Do not share them publicly.
-- If you're developing locally, you can add `http://localhost:8000` (or your local server's address) to the authorized JavaScript origins for testing.
-- The tool uses the `/auth/webmasters.readonly` scope, which provides read-only access to Search Console data.
-- Users of your tool will need to have the appropriate permissions in Search Console for the sites they want to inspect.
+For full API documentation, visit the [Google Search Console API Reference](https://developers.google.com/webmaster-tools/search-console-api-original/v3/urlInspection).
 
-## 7. Troubleshooting
+## Troubleshooting
 
-- If you encounter errors, double-check that:
-  - The Search Console API is enabled for your project.
-  - Your OAuth 2.0 client has the correct JavaScript origins set.
-  - You're using the correct Client ID and API Key.
-  - The user has the necessary permissions in Search Console for the site they're trying to inspect.
+- If you encounter authentication errors, ensure that your Client ID and API Key are correct and that you've set up the OAuth consent screen correctly in the Google Cloud Console.
+- If you're not seeing data for certain URLs, make sure they belong to a property you have access to in Google Search Console.
+- Check the browser console for any error messages if the tool isn't working as expected.
+
+## Security Considerations
+
+- Never share your Client ID or API Key publicly.
+- Use HTTPS to host the tool to ensure secure transmission of authentication tokens.
+- Regularly review and revoke access for unused or suspicious OAuth 2.0 clients in your Google account.
+
+## Limitations
+
+- The tool is subject to Google Search Console API quotas and limits.
+- It can only inspect URLs for properties you have access to in Google Search Console.
+
+## Support
+
+For issues, feature requests, or contributions, please open an issue on the GitHub repository.
