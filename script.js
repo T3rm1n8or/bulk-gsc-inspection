@@ -1,15 +1,72 @@
+const CLIENT_ID = 'YOUR_CLIENT_ID_HERE';
+const API_KEY = 'YOUR_API_KEY_HERE';
+const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/searchconsole/v1/rest';
+const SCOPES = 'https://www.googleapis.com/auth/webmasters.readonly';
+
+let tokenClient;
+let gapiInited = false;
+let gisInited = false;
+
 document.addEventListener('DOMContentLoaded', function() {
+    const authorizeButton = document.getElementById('authorizeButton');
     const inspectBtn = document.getElementById('inspectBtn');
     const exportBtn = document.getElementById('exportBtn');
     const urlList = document.getElementById('urlList');
     const results = document.getElementById('results');
-    const apiKeyInput = document.getElementById('apiKey');
     const siteUrlInput = document.getElementById('siteUrl');
+    const clientIdInput = document.getElementById('clientId');
+    const apiKeyInput = document.getElementById('apiKey');
 
-    inspectBtn.addEventListener('click', function() {
+    function gapiLoaded() {
+        gapi.load('client', initializeGapiClient);
+    }
+
+    async function initializeGapiClient() {
+        await gapi.client.init({
+            apiKey: apiKeyInput.value,
+            discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+    }
+
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientIdInput.value,
+            scope: SCOPES,
+            callback: '', // defined later
+        });
+        gisInited = true;
+        maybeEnableButtons();
+    }
+
+    function maybeEnableButtons() {
+        if (gapiInited && gisInited) {
+            authorizeButton.style.display = 'block';
+        }
+    }
+
+    authorizeButton.onclick = () => {
+        tokenClient.callback = async (resp) => {
+            if (resp.error !== undefined) {
+                throw (resp);
+            }
+            authorizeButton.style.display = 'none';
+            inspectBtn.style.display = 'block';
+            urlList.style.display = 'block';
+            siteUrlInput.style.display = 'block';
+        };
+
+        if (gapi.client.getToken() === null) {
+            tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+            tokenClient.requestAccessToken({prompt: ''});
+        }
+    }
+
+    inspectBtn.onclick = async () => {
         const urls = urlList.value.split('\n').filter(url => url.trim() !== '');
         const siteUrl = siteUrlInput.value.trim();
-        const apiKey = apiKeyInput.value.trim();
         
         if (urls.length === 0) {
             alert('Please enter at least one URL');
@@ -21,47 +78,26 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (!apiKey) {
-            alert('Please enter your Google Cloud API Key');
-            return;
-        }
-
         results.innerHTML = 'Inspecting URLs...';
         inspectBtn.disabled = true;
 
-        gapi.load('client', function() {
-            initClient(apiKey, urls, siteUrl);
-        });
-    });
-
-    function initClient(apiKey, urls, siteUrl) {
-        gapi.client.init({
-            'apiKey': apiKey,
-            'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/searchconsole/v1/rest'],
-        }).then(function() {
-            inspectUrls(urls, siteUrl);
-        }).catch(function(error) {
-            console.error('Error initializing GAPI client:', error);
-            results.innerHTML = 'An error occurred while initializing the API client.';
+        try {
+            const data = await Promise.all(urls.map(url => inspectUrl(url, siteUrl)));
+            displayResults(data);
+        } catch (err) {
+            console.error(err);
+            results.innerHTML = 'Error: ' + err.message;
+        } finally {
             inspectBtn.disabled = false;
-        });
-    }
+        }
+    };
 
-    function inspectUrls(urls, siteUrl) {
-        Promise.all(urls.map(url => inspectUrl(url, siteUrl)))
-            .then(displayResults)
-            .catch(error => {
-                console.error('Error:', error);
-                results.innerHTML = 'An error occurred while processing the URLs.';
-                inspectBtn.disabled = false;
+    async function inspectUrl(url, siteUrl) {
+        try {
+            const response = await gapi.client.searchconsole.urlInspection.index.inspect({
+                inspectionUrl: url,
+                siteUrl: siteUrl
             });
-    }
-
-    function inspectUrl(url, siteUrl) {
-        return gapi.client.searchconsole.urlInspection.index.inspect({
-            inspectionUrl: url,
-            siteUrl: siteUrl
-        }).then(response => {
             const data = response.result;
             return {
                 url: url,
@@ -73,12 +109,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 page_fetch: data.pageFetchState ? data.pageFetchState.status : '',
                 indexing_allowed: data.indexingState && data.indexingState.robotsTxtState && data.indexingState.robotsTxtState.allowed ? 'Yes' : 'No'
             };
-        }).catch(error => {
+        } catch (error) {
+            console.error('Error inspecting URL:', url, error);
             return {
                 url: url,
-                error: error.result.error.message
+                error: error.result ? error.result.error.message : error.message
             };
-        });
+        }
     }
 
     function displayResults(data) {
@@ -101,11 +138,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         html += '</table>';
         results.innerHTML = html;
-        inspectBtn.disabled = false;
         exportBtn.style.display = 'block';
     }
 
-    exportBtn.addEventListener('click', function() {
+    exportBtn.onclick = () => {
         const csvContent = generateCSV();
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
@@ -118,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
             link.click();
             document.body.removeChild(link);
         }
-    });
+    };
 
     function generateCSV() {
         const rows = results.querySelectorAll('tr');
@@ -128,4 +164,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }).join(',');
         }).join('\n');
     }
+
+    // Initialize the API client and OAuth
+    document.getElementById('initButton').onclick = () => {
+        gapiLoaded();
+        gisLoaded();
+    };
 });

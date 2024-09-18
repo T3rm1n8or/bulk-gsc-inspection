@@ -12,15 +12,19 @@
         <div class="instructions">
             <p>Follow these steps to use the URL Inspection Tool:</p>
             <ol>
-                <li>Enter your Google Cloud API Key. You can obtain this from the <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>.</li>
+                <li>Enter your Google Cloud Client ID and API Key.</li>
+                <li>Click the "Initialize" button to set up the API client.</li>
+                <li>Click the "Authorize" button to sign in with your Google account.</li>
                 <li>Enter the site URL you want to inspect. This should match a property you have verified in Google Search Console.</li>
                 <li>Paste the URLs you want to inspect, one per line, in the text area below.</li>
                 <li>Click the "Inspect URLs" button to start the inspection process.</li>
                 <li>Once the inspection is complete, you can view the results on the page or export them as a CSV file.</li>
             </ol>
-            <p><strong>Note:</strong> Keep your API key confidential. Do not share this page with your API key filled in.</p>
         </div>
+        <input type="text" id="clientId" placeholder="Enter your Google Cloud Client ID">
         <input type="text" id="apiKey" placeholder="Enter your Google Cloud API Key">
+        <button id="initButton">Initialize</button>
+        <button id="authorizeButton" style="display: none;">Authorize</button>
         <input type="text" id="siteUrl" placeholder="Enter your site URL (e.g., https://www.example.com)">
         <textarea id="urlList" rows="10" placeholder="Paste your URLs here, one per line"></textarea>
         <button id="inspectBtn">Inspect URLs</button>
@@ -28,6 +32,7 @@
         <button id="exportBtn" style="display: none;">Export CSV</button>
     </div>
     <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     <script src="script.js"></script>
 </body>
 </html>
