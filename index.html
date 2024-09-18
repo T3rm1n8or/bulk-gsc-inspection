@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Inspection Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>URL Inspection Tool</h1>
+        <div class="instructions">
+            <p>Follow these steps to use the URL Inspection Tool:</p>
+            <ol>
+                <li>Enter your Google Cloud API Key. You can obtain this from the <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>.</li>
+                <li>Enter the site URL you want to inspect. This should match a property you have verified in Google Search Console.</li>
+                <li>Paste the URLs you want to inspect, one per line, in the text area below.</li>
+                <li>Click the "Inspect URLs" button to start the inspection process.</li>
+                <li>Once the inspection is complete, you can view the results on the page or export them as a CSV file.</li>
+            </ol>
+            <p><strong>Note:</strong> Keep your API key confidential. Do not share this page with your API key filled in.</p>
+        </div>
+        <input type="text" id="apiKey" placeholder="Enter your Google Cloud API Key">
+        <input type="text" id="siteUrl" placeholder="Enter your site URL (e.g., https://www.example.com)">
+        <textarea id="urlList" rows="10" placeholder="Paste your URLs here, one per line"></textarea>
+        <button id="inspectBtn">Inspect URLs</button>
+        <div id="results"></div>
+        <button id="exportBtn" style="display: none;">Export CSV</button>
+    </div>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
